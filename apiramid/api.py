@@ -40,6 +40,14 @@ class Api(object):
                 break
         return result
 
+    def find_methods(self, path):
+        """ Find methods allowed for this path.
+        """
+        result = []
+        for node in self.raml.resources:
+            if node.path == path:
+                result.append(node.method.upper())
+        return result
 
     def find_schema(self, resource, http_status_code, mime_type):
         """ Find and return the corresponding schema in the document.

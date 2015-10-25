@@ -143,6 +143,7 @@ class Endpoint(object):
                 rel_path=self.endpoint['path'],
             )
             config.add_route(name, path)
+            self.add_options_view(config)
         return None
 
     def add_view(self, config):
@@ -152,6 +153,16 @@ class Endpoint(object):
             view=self.view_wrapper,
             route_name=self.name_route,
             request_method=self.endpoint['method'],
+        )
+        return None
+
+    def add_options_view(self, config):
+        """ Add the Pyramid view for the OPTIONS method.
+        """
+        config.add_view(
+            view=util.options_view,
+            route_name=self.name_route,
+            request_method='OPTIONS',
         )
         return None
 

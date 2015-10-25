@@ -6,8 +6,26 @@ import logging
 import pyramid
 import traceback
 
+from . import api
+
 
 LOG = logging.getLogger(__name__)
+
+
+def options_view(request):
+    """ Build a response for the OPTIONS method.
+    """
+    api_util = request.registry.queryUtility(api.IApi)
+    route = request.matched_route.pattern
+    path = route.replace(api_util.base_path, '')
+    allowed_methods = api_util.find_methods(path)
+    allow = ','.join(allowed_methods)
+    result = pyramid.httpexceptions.HTTPNoContent(
+        headers={
+            'Allow': allow,
+        },
+    )
+    return result
 
 
 def build_http_exception_dict(http_exception, request):

@@ -9,19 +9,19 @@ import types
 import venusian
 
 from . import api
+from . import i18n
 from . import util
 from . import view
-
-from .i18n import _
 
 
 MODULE_NAME = __name__
 
 ENDPOINT_NAME = '{}_{}'.format(MODULE_NAME, 'endpoint')
-#REQUEST_ATTRIBUTE_NAME_ENDPOINT = ENDPOINT_NAME
 VENUSIAN_CATEGORY = MODULE_NAME
 VENUSIAN_NAME_ENDPOINT = ENDPOINT_NAME
 
+
+_ = i18n._
 
 LOG = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ class Endpoint(object):
             self.decoratee_class = obj
         config = scanner.config.with_package(self.venusian_info.module)
         self.set_defaults(getattr(obj, EndpointDefaults.ATTRIBUTE_NAME, {}))
-        self.normalize()
+        self.check()
         self.api_util = config.registry.queryUtility(api.IApi)
         resource = self.api_util.find_resource(
             self.endpoint['path'],
@@ -114,12 +114,10 @@ class Endpoint(object):
         )
         return result
 
-    def normalize(self):
-        """ Check and normalize the endpoint arguements.
+    def check(self):
+        """ Check the endpoint arguements.
         """
-        if 'method' in self.endpoint:
-            self.endpoint['method'] = self.endpoint['method'].lower()
-        else:
+        if 'method' not in self.endpoint:
             comment = _("Endpoint has no method {}").format(self.endpoint)
             raise ValueError(comment)
         if 'path' not in self.endpoint:
@@ -153,7 +151,7 @@ class Endpoint(object):
         config.add_view(
             view=self.view_wrapper,
             route_name=self.name_route,
-            request_method=self.endpoint['method'].upper(),
+            request_method=self.endpoint['method'],
         )
         return None
 

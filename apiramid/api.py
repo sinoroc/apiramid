@@ -35,7 +35,7 @@ class Api(object):
         """
         result = None
         for node in self.raml.resources:
-            if node.path == path and node.method == method:
+            if node.path == path and node.method.upper() == method:
                 result = node
                 break
         return result

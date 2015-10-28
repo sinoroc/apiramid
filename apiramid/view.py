@@ -16,15 +16,15 @@ MODULE_NAME = __name__
 LOG = logging.getLogger(MODULE_NAME)
 
 
-def validate_uri_param(param, value):
+def validate_uri_parameter(parameter, value):
     if not value:
-        if param.required:
-            message = _("Required URI parameter {} is missing.").format(param.name)
+        if parameter.required:
+            message = _("Required URI parameter {} is missing.").format(parameter.name)
             raise pyramid.httpexceptions.HTTPBadRequest(message)
     else:
-        param_type = getattr(param, 'type', 'string')
+        param_type = getattr(parameter, 'type', 'string')
         if param_type == 'integer' and not value.isdigit():
-            message = _("URI parameter {} should be an integer.").format(param.name)
+            message = _("URI parameter {} should be an integer.").format(parameter.name)
             raise pyramid.httpexceptions.HTTPBadRequest(message)
     return None
 
@@ -39,15 +39,22 @@ def checkin(*args, **kwargs):
     attr_name = api_util.request_endpoint_attribute
     endpoint = getattr(request, attr_name, None)
     resource = endpoint.dcmnt_resource
-    uri_params = resource.uri_params if resource.uri_params else []
 
-    endpoint_uri_parameters = {}
-    for param in uri_params:
-        value = request.matchdict.get(param.name, None)
-        validate_uri_param(param, value)
-        endpoint_uri_parameters[param.name] = value
+    checkin_uri_parameters(request, resource)
 
-    endpoint.endpoint['uri_parameters'] = endpoint_uri_parameters
+    return None
+
+
+def checkin_uri_parameters(request, resource):
+    """ Validate URI parameters.
+        Support of optional URI parameters seems incompatible with Pyramid's
+        URL matching system.
+        Extra work is required to support optional URI parameters.
+    """
+    uri_parameters = resource.uri_params or []
+    for uri_parameter in uri_parameters:
+        value = request.matchdict[uri_parameter.name]
+        validate_uri_parameter(uri_parameter, value)
     return None
 
 

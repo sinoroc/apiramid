@@ -5,7 +5,6 @@
 import inspect
 import logging
 import pyramid
-import types
 import venusian
 
 from . import api
@@ -15,11 +14,6 @@ from . import view
 
 
 MODULE_NAME = __name__
-
-ENDPOINT_NAME = '{}_{}'.format(MODULE_NAME, 'endpoint')
-VENUSIAN_CATEGORY = MODULE_NAME
-VENUSIAN_NAME_ENDPOINT = ENDPOINT_NAME
-
 
 _ = i18n._
 
@@ -49,6 +43,9 @@ class Endpoint(object):
     """ Decorator for function, method or class callable.
     """
 
+    VENUSIAN_CATEGORY = MODULE_NAME
+    VENUSIAN_SUBCATGEORY = MODULE_NAME
+
     routes = []
 
     def __init__(self, **kwargs):
@@ -70,8 +67,8 @@ class Endpoint(object):
         self.venusian_info = venusian.attach(
             decoratee,
             self.callback,
-            category=VENUSIAN_CATEGORY,
-            name=VENUSIAN_NAME_ENDPOINT,
+            category=self.VENUSIAN_CATEGORY,
+            name=self.VENUSIAN_SUBCATGEORY,
         )
         return decoratee
 
@@ -89,7 +86,7 @@ class Endpoint(object):
             self.endpoint['method'],
         )
         if resource:
-            self.dcmnt_resource = resource
+            self.resource = resource
             self.add_endpoint(config)
         else:
             LOG.warning(_("Could not find resource."))
@@ -150,7 +147,7 @@ class Endpoint(object):
         """ Add a Pyramid view.
         """
         config.add_view(
-            view=self.view_wrapper,
+            view=self.view_callable,
             route_name=self.name_route,
             request_method=self.endpoint['method'],
         )
@@ -166,21 +163,18 @@ class Endpoint(object):
         )
         return None
 
-    def view_wrapper(self, *args, **kwargs):
+    def view_callable(self, *args, **kwargs):
         """ The view callable.
         """
         request = args[1]
-        attr_name = self.api_util.request_endpoint_attribute
-        setattr(request, attr_name, self)
-        view.checkin(*args, **kwargs)
-        request.response = self.run_view_callback(*args, **kwargs)
-        view.checkout(*args, **kwargs)
-        result = view.render(*args, **kwargs)
-        LOG.error("Endpoint.view_wrapper {}".format(result))
+        view.checkin(request, self)
+        request.response = self.run_user_view_callable(*args, **kwargs)
+        view.checkout(request, self)
+        result = view.render(request)
         return result
 
-    def run_view_callback(self, *args, **kwargs):
-        """ Run the view callback decorated in the user application.
+    def run_user_view_callable(self, *args, **kwargs):
+        """ Run the actual view callable decorated in the user application.
         """
         result = None
         if self.venusian_info.scope == 'class':
@@ -199,31 +193,13 @@ class Endpoint(object):
         return result
 
 
-def get_endpoint(request):
-    """ Get the ``Endpoint`` instance attached to the request.
-    """
-    api_util = request.registry.queryUtility(api.IApi)
-    attr_name = api_util.request_endpoint_attribute
-    result = getattr(request, attr_name, None)
-    if result is None:
-        raise Exception(_("Endpoint has not been attached to request yet."))
-    return result
-
-
 def includeme(config):
     """ Include the module in the Pyramid application.
     """
     document_path = config.registry.settings['{}.document'.format(MODULE_NAME)]
 
-    attr_name = config.registry.settings.get(
-        '{}.request_endpoint_attribute'.format(MODULE_NAME),
-        '{}_endpoint'.format(MODULE_NAME),
-    )
-
-    definition = api.Api(document_path, attr_name)
+    definition = api.Api(document_path)
     config.registry.registerUtility(definition, api.IApi)
-
-    config.add_request_method(get_endpoint, attr_name, reify=True)
 
     config.add_view(
         util.exception_view,

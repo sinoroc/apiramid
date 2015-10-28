@@ -29,19 +29,12 @@ def validate_uri_parameter(parameter, value):
     return None
 
 
-def checkin(*args, **kwargs):
+def checkin(request, endpoint):
     """ Validate request.
     """
-    dummy = kwargs
-    request = args[1]
-
     api_util = request.registry.queryUtility(api.IApi)
-    attr_name = api_util.request_endpoint_attribute
-    endpoint = getattr(request, attr_name, None)
-    resource = endpoint.dcmnt_resource
-
+    resource = endpoint.resource
     checkin_uri_parameters(request, resource)
-
     return None
 
 
@@ -65,12 +58,10 @@ def validate_json_response(document, schema):
     return None
 
 
-def validate_response(request, mime_type):
+def validate_response(request, endpoint, mime_type):
     api_util = request.registry.queryUtility(api.IApi)
-    attr_name = api_util.request_endpoint_attribute
-    endpoint = getattr(request, attr_name, None)
     schema = api_util.find_schema(
-        endpoint.dcmnt_resource,
+        endpoint.resource,
         200,
         mime_type,
     )
@@ -78,28 +69,24 @@ def validate_response(request, mime_type):
     return None
 
 
-def checkout(*args, **kwargs):
+def checkout(request, endpoint):
     """ Validate response.
     """
-    dummy = kwargs
-    request = args[1]
     mime_type = 'application/json'
     if not isinstance(request.response, pyramid.httpexceptions.HTTPException):
         raise Exception("Response is not an HTTPException")
-    validate_response(request, mime_type)
+    validate_response(request, endpoint, mime_type)
     return None
 
 
-def render(*args, **kwargs):
+def render(request):
     """ Render response.
     """
-    dummy = kwargs
-    request = args[1]
     renderer_name = 'json'
     result = pyramid.renderers.render_to_response(
         renderer_name=renderer_name,
         value=request.response.body,
-        request=request
+        request=request,
     )
     return result
 

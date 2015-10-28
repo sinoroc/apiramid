@@ -22,12 +22,9 @@ class Api(object):
     """ API utility
     """
 
-    def __init__(self, document_path, request_endpoint_attribute):
+    def __init__(self, document_path):
         self.raml = ramlfications.parse(document_path)
         self.base_path = urlparse.urlparse(self.raml.base_uri).path
-        self.request_endpoint_attribute = request_endpoint_attribute
-
-        LOG.error("Api.__init__ - resources {}".format(self.raml.resources))
         return None
 
     def find_resource(self, path, method):

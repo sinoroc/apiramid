@@ -9,15 +9,15 @@ import venusian
 
 from . import api
 from . import i18n
-from . import util
-from . import view
+from . import utils
+from . import views
 
 
 MODULE_NAME = __name__
 
-_ = i18n._
+LOG = logging.getLogger(MODULE_NAME)
 
-LOG = logging.getLogger(__name__)
+_ = i18n._
 
 
 class EndpointDefaults(object):
@@ -43,6 +43,7 @@ class Endpoint(object):
     """ Decorator for function, method or class callable.
     """
 
+    ROUTE_PREFIX = MODULE_NAME
     VENUSIAN_CATEGORY = MODULE_NAME
     VENUSIAN_SUBCATGEORY = MODULE_NAME
 
@@ -106,7 +107,7 @@ class Endpoint(object):
         """ Name of the route for this endpoint.
         """
         result = '{prefix}_{path}'.format(
-            prefix=MODULE_NAME,
+            prefix=self.ROUTE_PREFIX,
             path=self.endpoint['path'],
         )
         return result
@@ -157,7 +158,7 @@ class Endpoint(object):
         """ Add the Pyramid view for the OPTIONS method.
         """
         config.add_view(
-            view=util.options_view,
+            view=views.options_view,
             route_name=self.name_route,
             request_method='OPTIONS',
         )
@@ -167,11 +168,17 @@ class Endpoint(object):
         """ The view callable.
         """
         request = args[1]
-        view.checkin(request, self)
+        self.checkin(request)
         request.response = self.run_user_view_callable(*args, **kwargs)
-        view.checkout(request, self)
-        result = view.render(request)
+        self.checkout(request)
+        result = self.render(request)
         return result
+
+    def checkin(self, request):
+        """ Validate request.
+        """
+        utils.validate_uri_parameters(request, self.resource)
+        return None
 
     def run_user_view_callable(self, *args, **kwargs):
         """ Run the actual view callable decorated in the user application.
@@ -190,6 +197,26 @@ class Endpoint(object):
             result = self.decoratee(*args, **kwargs)
         else:
             raise Exception(_("Could not identify view callable."))
+        return result
+
+    def checkout(self, request):
+        """ Validate response.
+        """
+        mime_type = 'application/json'
+        if not isinstance(request.response, pyramid.httpexceptions.HTTPException):
+            raise Exception(_("Response is not an HTTPException"))
+        utils.validate_response(request, self.resource, mime_type)
+        return None
+
+    def render(self, request):
+        """ Render response.
+        """
+        renderer_name = 'json'
+        result = pyramid.renderers.render_to_response(
+            renderer_name=renderer_name,
+            value=request.response.body,
+            request=request,
+        )
         return result
 
 

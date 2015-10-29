@@ -8,7 +8,9 @@ import urlparse
 import zope
 
 
-LOG = logging.getLogger(__name__)
+MODULE_NAME = __name__
+
+LOG = logging.getLogger(MODULE_NAME)
 
 
 class IApi(zope.interface.Interface):

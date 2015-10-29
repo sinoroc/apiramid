@@ -2,8 +2,13 @@
 """
 
 
+import pyramid
+
+from . import api
 from . import endpoint
 
+
+MODULE_NAME = __name__
 
 __all__ = [
     'endpoint.EndpointDefaults',
@@ -14,10 +19,6 @@ __all__ = [
 def includeme(config):
     """ Include the module in the Pyramid application.
     """
-    import pyramid
-    from . import api
-
-    MODULE_NAME = __name__
 
     document_path = config.registry.settings['{}.document'.format(MODULE_NAME)]
 
@@ -25,12 +26,12 @@ def includeme(config):
     config.registry.registerUtility(definition, api.IApi)
 
     config.add_view(
-        util.exception_view,
+        views.exception_view,
         context=Exception,
         renderer='json',
     )
     config.add_view(
-        util.http_exception_view,
+        views.http_exception_view,
         context=pyramid.httpexceptions.HTTPException,
         renderer='json',
     )

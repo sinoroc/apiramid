@@ -9,7 +9,9 @@ import traceback
 from . import api
 
 
-LOG = logging.getLogger(__name__)
+MODULE_NAME = __name__
+
+LOG = logging.getLogger(MODULE_NAME)
 
 
 def options_view(request):

@@ -5,7 +5,9 @@
 import pyramid
 
 
-L10N_DOMAIN = __name__
+MODULE_NAME = __name__
+
+L10N_DOMAIN = MODULE_NAME
 
 
 _ = pyramid.i18n.TranslationStringFactory(L10N_DOMAIN)

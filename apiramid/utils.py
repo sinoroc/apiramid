@@ -3,20 +3,23 @@
 
 
 import api
-import json
 import jsonschema
 import logging
 import pyramid
 
-from .i18n import _
+from . import i18n
 
 
 MODULE_NAME = __name__
 
 LOG = logging.getLogger(MODULE_NAME)
 
+_ = i18n._
+
 
 def validate_uri_parameter(parameter, value):
+    """ Validate URI parameter.
+    """
     if not value:
         if parameter.required:
             message = _("Required URI parameter {} is missing.").format(parameter.name)
@@ -29,16 +32,7 @@ def validate_uri_parameter(parameter, value):
     return None
 
 
-def checkin(request, endpoint):
-    """ Validate request.
-    """
-    api_util = request.registry.queryUtility(api.IApi)
-    resource = endpoint.resource
-    checkin_uri_parameters(request, resource)
-    return None
-
-
-def checkin_uri_parameters(request, resource):
+def validate_uri_parameters(request, resource):
     """ Validate URI parameters.
         Support of optional URI parameters seems incompatible with Pyramid's
         URL matching system.
@@ -58,37 +52,15 @@ def validate_json_response(document, schema):
     return None
 
 
-def validate_response(request, endpoint, mime_type):
+def validate_response(request, resource, mime_type):
     api_util = request.registry.queryUtility(api.IApi)
     schema = api_util.find_schema(
-        endpoint.resource,
+        resource,
         200,
         mime_type,
     )
     validate_json_response(request.response.body, schema)
     return None
-
-
-def checkout(request, endpoint):
-    """ Validate response.
-    """
-    mime_type = 'application/json'
-    if not isinstance(request.response, pyramid.httpexceptions.HTTPException):
-        raise Exception("Response is not an HTTPException")
-    validate_response(request, endpoint, mime_type)
-    return None
-
-
-def render(request):
-    """ Render response.
-    """
-    renderer_name = 'json'
-    result = pyramid.renderers.render_to_response(
-        renderer_name=renderer_name,
-        value=request.response.body,
-        request=request,
-    )
-    return result
 
 
 # EOF

@@ -1,3 +1,7 @@
 # Python
+*.egg
 *.egg-info/
 *.pyc
+
+# vi
+.*.swp

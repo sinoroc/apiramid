@@ -5,7 +5,7 @@
 import logging
 import ramlfications
 import urlparse
-import zope
+import zope.interface
 
 
 MODULE_NAME = __name__

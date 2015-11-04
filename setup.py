@@ -1,7 +1,11 @@
+""" Package setup
+"""
+
+
 import setuptools
 
 
-MODULE_NAME = 'apiramid'
+PACKAGE_NAME = 'apiramid'
 
 SEMVER_MAJOR = 0
 SEMVER_MINOR = 0
@@ -21,9 +25,24 @@ REQUIREMENTS = [
 
 INSTALL_REQUIREMENTS = REQUIREMENTS
 
+TESTS_REQUIREMENTS = REQUIREMENTS + [
+    'WebTest',
+]
+
+TEST_SUITE = 'tests'
+
+PACKAGES = setuptools.find_packages()
+
 
 setuptools.setup(
-    name=MODULE_NAME,
+    name=PACKAGE_NAME,
     version=SEMVER_VERSION,
     install_requires=INSTALL_REQUIREMENTS,
+    tests_require=TESTS_REQUIREMENTS,
+    test_suite=TEST_SUITE,
+    packages=PACKAGES,
+    include_package_data=True,
 )
+
+
+# EOF

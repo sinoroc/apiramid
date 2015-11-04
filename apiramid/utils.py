@@ -2,11 +2,11 @@
 """
 
 
-import api
 import jsonschema
 import logging
 import pyramid
 
+from . import api
 from . import i18n
 
 

@@ -1,0 +1,74 @@
+#%RAML 0.8
+
+---
+
+
+title: "Bidule API"
+version: "v0.0"
+baseUri: http://{apiUri}/{version}
+mediaType: application/json
+
+
+/bar/{id}:
+    displayName: "Resource bar"
+    uriParameters:
+        "id":
+            displayName: "Bar ID"
+            type: integer
+    get:
+        description: "Read bar"
+        responses:
+            200:
+                body:
+                    application/json:
+                        schema: |
+                            {
+                                "$schema": "http://json-schema.org/draft-03/schema",
+                                "type": "object",
+                                "required": true,
+                                "properties": {
+                                    "name": {
+                                        "required": true,
+                                        "type": "string"
+                                    },
+                                    "id": {
+                                        "required": true,
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+    post:
+        description: "Create bar"
+        responses:
+            201:
+                body:
+                    application/json:
+    put:
+        description: "Update bar"
+        responses:
+            204:
+                body:
+                    application/json:
+
+/foo:
+    displayName: "Resource foo"
+    get:
+        description: "Read foo"
+        responses:
+            200:
+                body:
+                    application/json:
+    post:
+        descriptiont: "Create foo"
+
+/item:
+    displayName: "Resource item"
+    get:
+        description: "Read item"
+        responses:
+            200:
+                body:
+                    application/json:
+
+
+...  # EOF

@@ -47,8 +47,6 @@ class Endpoint(object):
     VENUSIAN_CATEGORY = MODULE_NAME
     VENUSIAN_SUBCATGEORY = MODULE_NAME
 
-    routes = []
-
     def __init__(self, **kwargs):
         """ Expected keywords:
             ``method``
@@ -126,23 +124,35 @@ class Endpoint(object):
     def add_endpoint(self, config):
         """ Set an endpoint: add route if not available yet and add view.
         """
-        self.add_route(config)
+        if not self.route_exists(config):
+            self.add_route(config)
         self.add_view(config)
         return None
 
     def add_route(self, config):
-        """ Add a Pyramid route if not added yet.
+        """ Add a Pyramid route.
         """
         name = self.name_route
-        if name not in self.routes:
-            self.routes.append(name)
-            path = '{base_path}{rel_path}'.format(
-                base_path=self.api_util.base_path,
-                rel_path=self.endpoint['path'],
-            )
-            config.add_route(name, path)
-            self.add_options_view(config)
+        path = '{base_path}{rel_path}'.format(
+            base_path=self.api_util.base_path,
+            rel_path=self.endpoint['path'],
+        )
+        config.add_route(name, path)
+        self.add_options_view(config)
         return None
+
+    def route_exists(self, config):
+        """ Check if the associated route already exists.
+        """
+        result = False
+        config.commit()  # commit pending actions before introspection
+        routes = config.introspector.get_category('routes', [])
+        names = [route['introspectable']['name'] for route in routes]
+        for name in names:
+            if name == self.name_route:
+                result = True
+                break
+        return result
 
     def add_view(self, config):
         """ Add a Pyramid view.

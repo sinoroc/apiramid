@@ -49,8 +49,10 @@ class Endpoint(object):
 
     def __init__(self, **kwargs):
         """ Expected keywords:
-            ``method``
+            ``request_method``
             ``path``
+            ``accept``
+            ``renderer``
         """
         self.endpoint = kwargs
         # utility members
@@ -82,7 +84,7 @@ class Endpoint(object):
         self.api_util = config.registry.queryUtility(api.IApi)
         resource = self.api_util.find_resource(
             self.endpoint['path'],
-            self.endpoint['method'],
+            self.endpoint['request_method'],
         )
         if resource:
             self.resource = resource
@@ -113,8 +115,8 @@ class Endpoint(object):
     def check(self):
         """ Check the endpoint arguements.
         """
-        if 'method' not in self.endpoint:
-            comment = _("Endpoint has no method {}").format(self.endpoint)
+        if 'request_method' not in self.endpoint:
+            comment = _("Endpoint has no request_method {}").format(self.endpoint)
             raise ValueError(comment)
         if 'path' not in self.endpoint:
             comment = _("Endpoint has no path {}").format(self.endpoint)
@@ -160,7 +162,9 @@ class Endpoint(object):
         config.add_view(
             view=self.view_callable,
             route_name=self.name_route,
-            request_method=self.endpoint['method'],
+            request_method=self.endpoint['request_method'],
+            accept=self.endpoint.get('accept', None),
+            renderer=self.endpoint.get('renderer', None),
         )
         return None
 
@@ -212,22 +216,40 @@ class Endpoint(object):
     def checkout(self, request):
         """ Validate response.
         """
-        mime_type = 'application/json'
         if not isinstance(request.response, pyramid.httpexceptions.HTTPException):
             raise Exception(_("Response is not an HTTPException"))
-        utils.validate_response(request, self.resource, mime_type)
         return None
 
     def render(self, request):
         """ Render response.
         """
-        renderer_name = 'json'
+        renderer_name = self.negotiate_renderer(request)
         result = pyramid.renderers.render_to_response(
             renderer_name=renderer_name,
             value=request.response.body,
             request=request,
         )
         return result
+
+    def negotiate_renderer(self, request):
+        """ Find an appropriate renderer for this request.
+        """
+        result = None
+        endpoint_renderer = self.endpoint.get('renderer', None)
+        endpoint_accept = self.endpoint.get('accept', None)
+        request_accept = request.headers.get('accept', None)
+
+        if endpoint_renderer:
+            # use the renderer specified as view predicate
+            result = endpoint_renderer
+        elif endpoint_accept:
+            # use the MIME specified as view predicate
+            result = self.api_util.find_renderer_for_mime_type(endpoint_accept)
+        elif request_accept:
+            # use the MIME specified in the HTTP header
+            result = self.api_util.find_renderer_for_mime_type(request_accept)
+
+        return result or 'json'
 
 
 # EOF

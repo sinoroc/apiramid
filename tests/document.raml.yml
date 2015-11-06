@@ -70,5 +70,14 @@ mediaType: application/json
                 body:
                     application/json:
 
+/capitalize:
+    put:
+        responses:
+            200:
+                body:
+                    application/json:
+                    application/xml:
+                    text/plain:
+
 
 ...  # EOF

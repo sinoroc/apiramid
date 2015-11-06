@@ -2,7 +2,6 @@
 """
 
 
-import jsonschema
 import logging
 import pyramid
 
@@ -42,24 +41,6 @@ def validate_uri_parameters(request, resource):
     for uri_parameter in uri_parameters:
         value = request.matchdict[uri_parameter.name]
         validate_uri_parameter(uri_parameter, value)
-    return None
-
-
-def validate_json_response(document, schema):
-    """ Validate JSON response.
-    """
-    jsonschema.validate(document, schema)
-    return None
-
-
-def validate_response(request, resource, mime_type):
-    api_util = request.registry.queryUtility(api.IApi)
-    schema = api_util.find_schema(
-        resource,
-        200,
-        mime_type,
-    )
-    validate_json_response(request.response.body, schema)
     return None
 
 

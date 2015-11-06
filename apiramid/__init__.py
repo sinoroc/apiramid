@@ -25,6 +25,8 @@ def includeme(config):
     definition = api.Api(document_path)
     config.registry.registerUtility(definition, api.IApi)
 
+    config.add_directive('set_mime_renderer', api.set_mime_renderer)
+
     config.add_view(
         views.exception_view,
         context=Exception,

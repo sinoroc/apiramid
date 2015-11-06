@@ -18,7 +18,6 @@ SEMVER_VERSION = '{major}.{minor}.{maintenance}'.format(
 )
 
 REQUIREMENTS = [
-    'jsonschema',
     'pyramid',
     'ramlfications',
 ]
@@ -26,6 +25,7 @@ REQUIREMENTS = [
 INSTALL_REQUIREMENTS = REQUIREMENTS
 
 TESTS_REQUIREMENTS = REQUIREMENTS + [
+    'dicttoxml',
     'WebTest',
 ]
 

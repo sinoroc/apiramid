@@ -37,7 +37,7 @@ class Bar(object):
         self.bar_id = int(request.matchdict['id'])
         return None
 
-    @apiramid.endpoint.Endpoint(method='GET')
+    @apiramid.endpoint.Endpoint(request_method='GET')
     def get(self):
         result = None
         body = {
@@ -49,26 +49,26 @@ class Bar(object):
         )
         return result
 
-    @apiramid.endpoint.Endpoint(method='POST')
+    @apiramid.endpoint.Endpoint(request_method='POST')
     def post(self):
         raise pyramid.httpexceptions.HTTPNotImplemented()
 
-    @apiramid.endpoint.Endpoint(method='PUT')
+    @apiramid.endpoint.Endpoint(request_method='PUT')
     def put(self):
         raise pyramid.httpexceptions.HTTPNotImplemented()
 
 
-@apiramid.endpoint.Endpoint(path='/foo', method='GET')
+@apiramid.endpoint.Endpoint(path='/foo', request_method='GET')
 def foo_get(context, request):
     return pyramid.httpexceptions.HTTPOk()
 
 
-@apiramid.endpoint.Endpoint(path='/foo', method='POST')
+@apiramid.endpoint.Endpoint(path='/foo', request_method='POST')
 def foo_post(context, request):
     return pyramid.httpexceptions.HTTPCreated()
 
 
-@apiramid.endpoint.Endpoint(path='/item', method='GET')
+@apiramid.endpoint.Endpoint(path='/item', request_method='GET')
 class Item(object):
 
     def __init__(self, context, request):
@@ -77,23 +77,12 @@ class Item(object):
     def __call__(self):
         body = {
             'path': 'item',
-            'method': 'get',
+            'method': 'GET',
         }
         result = pyramid.httpexceptions.HTTPOk(
             body=body,
         )
         return result
-
-
-def main(global_config, **settings):
-    config = pyramid.config.Configurator(
-        settings=settings,
-    )
-    config.include('apiramid')
-    config.add_route('root', '/')
-    config.add_static_view('static', 'bidule:static')
-    config.scan()
-    return config.make_wsgi_app()
 
 
 # EOF

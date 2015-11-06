@@ -13,6 +13,12 @@ MODULE_NAME = __name__
 LOG = logging.getLogger(MODULE_NAME)
 
 
+DEFAULT_MIME_RENDERERS = {
+    'application/json': 'json',
+    'text/plain': 'string',
+}
+
+
 class IApi(zope.interface.Interface):
     """ Interface for the API utility
     """
@@ -27,6 +33,7 @@ class Api(object):
     def __init__(self, document_path):
         self.raml = ramlfications.parse(document_path)
         self.base_path = urlparse.urlparse(self.raml.base_uri).path
+        self.mime_renderers = DEFAULT_MIME_RENDERERS
         return None
 
     def find_resource(self, path, method):
@@ -55,7 +62,7 @@ class Api(object):
             mime_type - string
         """
         result = {}
-        responses = resource.responses if resource.responses else []
+        responses = resource.responses or []
         for response in responses:
             if response.method == resource.method and response.code == http_status_code:
                 for body in response.body:
@@ -63,8 +70,31 @@ class Api(object):
                         result = body.schema
                         break
                 break
-        LOG.error("Api.find_schema {}".format(result))
         return result
+
+    def set_mime_renderer(self, mime_type, renderer):
+        """ Set the renderer for the MIME type.
+        """
+        self.mime_renderers[mime_type] = renderer
+        return None
+
+    def find_renderer_for_mime_type(self, mime_type):
+        """ Find a renderer for this MIME type.
+        """
+        result = None
+        for mime, renderer in self.mime_renderers.items():
+            if mime == mime_type:
+                result = renderer
+                break
+        return result
+
+
+def set_mime_renderer(config, mime_type, renderer):
+    """ Set the renderer for the MIME type.
+    """
+    api_util = config.registry.queryUtility(IApi)
+    api_util.set_mime_renderer(mime_type, renderer)
+    return None
 
 
 # EOF

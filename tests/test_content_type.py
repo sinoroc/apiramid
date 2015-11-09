@@ -2,11 +2,11 @@
 """
 
 
-import dicttoxml
 import os
 import pyramid
 import unittest
 import webtest
+import xmltodict
 
 
 PACKAGE_NAME = 'apiramid'
@@ -30,13 +30,15 @@ class XmlRendererFactory:
         request = system['request']
         response = request.response
         response.content_type = self.CONTENT_TYPE
-        result = dicttoxml.dicttoxml(value)
+        result = xmltodict.unparse(value)
         return result
 
 
 class TestAccept(unittest.TestCase):
 
     def setUp(self):
+        self.input_text = 'test text'
+        self.output_text = self.input_text.capitalize()
         settings = {
             '{}.document'.format(PACKAGE_NAME): DOCUMENT_PATH,
         }
@@ -54,7 +56,8 @@ class TestAccept(unittest.TestCase):
 
     def test_accept_json(self):
         response = self.accept_mime_type('application/json')
-        self.assertEqual(response.json['text'], 'Test text')
+        text = response.json['text']
+        self.assertEqual(text, self.output_text)
         return None
 
     def test_accept_text(self):
@@ -63,12 +66,14 @@ class TestAccept(unittest.TestCase):
 
     def test_accept_xml(self):
         response = self.accept_mime_type('application/xml')
+        text = xmltodict.parse(response.body)['text']
+        self.assertEqual(text, self.output_text)
         return None
 
     def accept_mime_type(self, mime_type):
         response = self.test_application.put_json(
             '/v0.0/capitalize',
-            {'text': 'test text'},
+            {'text': self.input_text},
             headers={
                 'Accept': mime_type,
             },

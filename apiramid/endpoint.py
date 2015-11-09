@@ -243,11 +243,11 @@ class Endpoint(object):
             # use the renderer specified as view predicate
             result = endpoint_renderer
         elif endpoint_accept:
-            # use the MIME specified as view predicate
-            result = self.api_util.find_renderer_for_mime_type(endpoint_accept)
+            # use the media type specified as view predicate
+            result = self.api_util.find_media_renderer(endpoint_accept)
         elif request_accept:
-            # use the MIME specified in the HTTP header
-            result = self.api_util.find_renderer_for_mime_type(request_accept)
+            # use the media type specified in the HTTP header
+            result = self.api_util.find_media_renderer(request_accept)
 
         return result or 'json'
 

@@ -13,7 +13,7 @@ MODULE_NAME = __name__
 LOG = logging.getLogger(MODULE_NAME)
 
 
-DEFAULT_MIME_RENDERERS = {
+DEFAULT_MEDIA_RENDERERS = {
     'application/json': 'json',
     'text/plain': 'string',
 }
@@ -33,7 +33,7 @@ class Api(object):
     def __init__(self, document_path):
         self.raml = ramlfications.parse(document_path)
         self.base_path = urlparse.urlparse(self.raml.base_uri).path
-        self.mime_renderers = DEFAULT_MIME_RENDERERS
+        self.media_renderers = DEFAULT_MEDIA_RENDERERS
         return None
 
     def find_resource(self, path, method):
@@ -55,45 +55,45 @@ class Api(object):
                 result.append(node.method.upper())
         return result
 
-    def find_schema(self, resource, http_status_code, mime_type):
+    def find_schema(self, resource, http_status_code, media_type):
         """ Find and return the corresponding schema in the document.
             resource - class ramlfications.raml.ResourceNode
             http_status_code - int
-            mime_type - string
+            media_type - string
         """
         result = {}
         responses = resource.responses or []
         for response in responses:
             if response.method == resource.method and response.code == http_status_code:
                 for body in response.body:
-                    if body.mime_type == mime_type:
+                    if body.media_type == media_type:
                         result = body.schema
                         break
                 break
         return result
 
-    def set_mime_renderer(self, mime_type, renderer):
-        """ Set the renderer for the MIME type.
+    def set_media_renderer(self, media_type, renderer):
+        """ Set the renderer for the media type.
         """
-        self.mime_renderers[mime_type] = renderer
+        self.media_renderers[media_type] = renderer
         return None
 
-    def find_renderer_for_mime_type(self, mime_type):
-        """ Find a renderer for this MIME type.
+    def find_media_renderer(self, media_type):
+        """ Find a renderer for this media type.
         """
         result = None
-        for mime, renderer in self.mime_renderers.items():
-            if mime == mime_type:
+        for media, renderer in self.media_renderers.items():
+            if media == media_type:
                 result = renderer
                 break
         return result
 
 
-def set_mime_renderer(config, mime_type, renderer):
-    """ Set the renderer for the MIME type.
+def set_media_renderer(config, media_type, renderer):
+    """ Set the renderer for the media type.
     """
     api_util = config.registry.queryUtility(IApi)
-    api_util.set_mime_renderer(mime_type, renderer)
+    api_util.set_media_renderer(media_type, renderer)
     return None
 
 

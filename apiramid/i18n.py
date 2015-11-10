@@ -2,7 +2,7 @@
 """
 
 
-import pyramid
+import pyramid.i18n
 
 
 MODULE_NAME = __name__

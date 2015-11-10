@@ -3,8 +3,8 @@
 
 
 import os
-import unittest
 import pyramid.testing
+import unittest
 import webtest
 
 
@@ -48,5 +48,6 @@ class TestResources(unittest.TestCase):
     def test_get_bar(self):
         response = self.test_application.get('/v0.0/bar/1', status=200)
         return None
+
 
 # EOF

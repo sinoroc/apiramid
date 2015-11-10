@@ -1,1 +1,1 @@
-recursive-include tests *.yml
+recursive-include apiramid/test *.yml

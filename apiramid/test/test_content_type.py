@@ -3,7 +3,7 @@
 
 
 import os
-import pyramid
+import pyramid.testing
 import unittest
 import webtest
 import xmltodict

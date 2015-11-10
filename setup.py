@@ -28,7 +28,7 @@ TESTS_REQUIREMENTS = REQUIREMENTS + [
     'WebTest',
 ]
 
-TEST_SUITE = 'tests'
+TEST_SUITE = '{}.test'.format(PACKAGE_NAME)
 
 PACKAGES = setuptools.find_packages()
 

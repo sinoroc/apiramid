@@ -5,7 +5,7 @@
 import logging
 import pyramid
 import ramlfications
-import urlparse
+import urllib
 import zope.interface
 
 
@@ -33,7 +33,7 @@ class Api(object):
 
     def __init__(self, document_path):
         self.raml = ramlfications.parse(document_path)
-        self.base_path = urlparse.urlparse(self.raml.base_uri).path
+        self.base_path = urllib.parse.urlparse(self.raml.base_uri).path
         self.media_renderers = DEFAULT_MEDIA_RENDERERS
         self.deserializers = {}
         self.media_deserializers = {}

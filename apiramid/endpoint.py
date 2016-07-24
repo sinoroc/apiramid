@@ -187,7 +187,10 @@ class Endpoint(object):
         self.checkin(request)
         request.response = self.run_user_view_callable(*args, **kwargs)
         self.checkout(request)
-        result = self.render(request)
+        if request.response.body:
+            result = self.render(request)
+        else:
+            result = request.response
         return result
 
     def deserialize(self, request):

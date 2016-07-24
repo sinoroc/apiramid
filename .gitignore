@@ -1,7 +1,17 @@
+# .gitignore
+
+
 # Python
-*.egg
-*.egg-info/
 *.pyc
+/*.egg/
+/*.egg-info/
+/.eggs/
+/.venv/
+/build/
+/dist/
 
 # vi
 .*.swp
+
+
+# EOF

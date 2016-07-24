@@ -26,6 +26,8 @@ def includeme(config):
     config.registry.registerUtility(definition, api.IApi)
 
     config.add_directive('set_media_renderer', api.set_media_renderer)
+    config.add_directive('add_deserializer', api.add_deserializer)
+    config.add_directive('set_media_deserializer', api.set_media_deserializer)
 
     config.add_view(
         views.exception_view,

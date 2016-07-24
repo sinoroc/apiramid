@@ -53,6 +53,7 @@ class Endpoint(object):
             ``path``
             ``accept``
             ``renderer``
+            ``deserialize`` boolean
         """
         self.endpoint = kwargs
         # utility members
@@ -182,11 +183,23 @@ class Endpoint(object):
         """ The view callable.
         """
         request = args[1]
+        self.deserialize(request)
         self.checkin(request)
         request.response = self.run_user_view_callable(*args, **kwargs)
         self.checkout(request)
         result = self.render(request)
         return result
+
+    def deserialize(self, request):
+        if self.endpoint.get('deserialize', False):
+            media_type = request.content_type
+            deserializer_name = self.api_util.find_media_deserializer(media_type)
+            request.dict_body = self.api_util.deserialize(
+                deserializer_name=deserializer_name,
+                value=request.body,
+                request=request,
+            )
+        return None
 
     def checkin(self, request):
         """ Validate request.

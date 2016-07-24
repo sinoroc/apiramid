@@ -4,9 +4,10 @@
 
 import apiramid
 import pyramid
+import xmltodict
 
 
-@apiramid.endpoint.EndpointDefaults(path='/capitalize')
+@apiramid.endpoint.EndpointDefaults(path='/capitalize', deserialize=True)
 class Capitalize(object):
 
     def __init__(self, context, request):
@@ -14,7 +15,7 @@ class Capitalize(object):
         return None
 
     def capitalize(self):
-        text = self.request.json_body.get('text', '')
+        text = self.request.dict_body.get('text', '')
         result = {
             'text': text.capitalize(),
         }
@@ -26,6 +27,41 @@ class Capitalize(object):
         return pyramid.httpexceptions.HTTPOk(
             body=result,
         )
+
+
+class XmlRendererFactory:
+
+    MEDIA_TYPE = 'application/xml'
+
+    def __init__(self, info):
+        pass
+
+    def __call__(self, value, system):
+        request = system['request']
+        response = request.response
+        response.content_type = self.MEDIA_TYPE
+        result = xmltodict.unparse(value)
+        return result
+
+
+class XmlDeserializerFactory:
+
+    def __init__(self, info):
+        pass
+
+    def __call__(self, value, system):
+        result = xmltodict.parse(value)
+        return result
+
+
+class JsonDeserializerFactory:
+
+    def __init__(self, info):
+        pass
+
+    def __call__(self, value, system):
+        result = system['request'].json_body
+        return result
 
 
 # EOF

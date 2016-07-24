@@ -3,6 +3,7 @@
 
 
 import logging
+import pyramid
 import ramlfications
 import urlparse
 import zope.interface
@@ -34,6 +35,8 @@ class Api(object):
         self.raml = ramlfications.parse(document_path)
         self.base_path = urlparse.urlparse(self.raml.base_uri).path
         self.media_renderers = DEFAULT_MEDIA_RENDERERS
+        self.deserializers = {}
+        self.media_deserializers = {}
         return None
 
     def find_resource(self, path, method):
@@ -81,11 +84,31 @@ class Api(object):
     def find_media_renderer(self, media_type):
         """ Find a renderer for this media type.
         """
-        result = None
-        for media, renderer in self.media_renderers.items():
-            if media == media_type:
-                result = renderer
-                break
+        result = self.media_renderers.get(media_type, None)
+        return result
+
+    def add_deserializer(self, deserializer_handle, deserializer):
+        self.deserializers[deserializer_handle] = deserializer
+        return None
+
+    def set_media_deserializer(self, media_type, deserializer):
+        self.media_deserializers[media_type] = deserializer
+        return None
+
+    def find_media_deserializer(self, media_type):
+        result = self.media_deserializers.get(media_type, None)
+        return result
+
+    def deserialize(self, deserializer_name, value, request=None):
+        maybe_deserializer = self.deserializers[deserializer_name]
+        resolver = pyramid.path.DottedNameResolver()
+        deserializer = resolver.maybe_resolve(maybe_deserializer)
+        info = {}
+        system = {
+            'request': request,
+        }
+        instance = deserializer(info)
+        result = instance(value, system)
         return result
 
 
@@ -94,6 +117,20 @@ def set_media_renderer(config, media_type, renderer):
     """
     api_util = config.registry.queryUtility(IApi)
     api_util.set_media_renderer(media_type, renderer)
+    return None
+
+
+def add_deserializer(config, deserializer_handle, deserializer):
+    api_util = config.registry.queryUtility(IApi)
+    api_util.add_deserializer(deserializer_handle, deserializer)
+    return None
+
+
+def set_media_deserializer(config, media_type, deserializer):
+    """ Set the renderer for the media type.
+    """
+    api_util = config.registry.queryUtility(IApi)
+    api_util.set_media_deserializer(media_type, deserializer)
     return None
 
 

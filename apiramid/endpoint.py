@@ -117,7 +117,9 @@ class Endpoint(object):
         """ Check the endpoint arguements.
         """
         if 'request_method' not in self.endpoint:
-            comment = _("Endpoint has no request_method {}").format(self.endpoint)
+            comment = _("Endpoint has no request_method {}").format(
+                self.endpoint,
+            )
             raise ValueError(comment)
         if 'path' not in self.endpoint:
             comment = _("Endpoint has no path {}").format(self.endpoint)
@@ -196,9 +198,9 @@ class Endpoint(object):
     def deserialize(self, request):
         if self.endpoint.get('deserialize', False):
             media_type = request.content_type
-            deserializer_name = self.api_util.find_media_deserializer(media_type)
+            deserializer = self.api_util.find_media_deserializer(media_type)
             request.dict_body = self.api_util.deserialize(
-                deserializer_name=deserializer_name,
+                deserializer_name=deserializer,
                 value=request.body,
                 request=request,
             )
@@ -232,7 +234,8 @@ class Endpoint(object):
     def checkout(self, request):
         """ Validate response.
         """
-        if not isinstance(request.response, pyramid.httpexceptions.HTTPException):
+        response = request.response
+        if not isinstance(response, pyramid.httpexceptions.HTTPException):
             raise Exception(_("Response is not an HTTPException"))
         return None
 

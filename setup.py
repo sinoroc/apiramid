@@ -24,6 +24,7 @@ INSTALL_REQUIREMENTS = [
 
 SETUP_REQUIREMENTS = [
     'pytest-runner',
+    'setuptools-pep8',
 ]
 
 TESTS_REQUIREMENTS = [

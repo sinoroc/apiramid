@@ -5,7 +5,7 @@
 import setuptools
 
 
-PACKAGE_NAME = 'apiramid'
+PROJECT_NAME = 'apiramid'
 
 SEMVER_MAJOR = 0
 SEMVER_MINOR = 0
@@ -17,28 +17,30 @@ SEMVER_VERSION = '{major}.{minor}.{maintenance}'.format(
     maintenance=SEMVER_MAINTENANCE,
 )
 
-REQUIREMENTS = [
+INSTALL_REQUIREMENTS = [
     'pyramid',
     'ramlfications',
 ]
 
-INSTALL_REQUIREMENTS = REQUIREMENTS
+SETUP_REQUIREMENTS = [
+    'pytest-runner',
+]
 
-TESTS_REQUIREMENTS = REQUIREMENTS + [
+TESTS_REQUIREMENTS = [
+    'pytest',
     'WebTest',
 ]
 
-TEST_SUITE = '{}.test'.format(PACKAGE_NAME)
 
 PACKAGES = setuptools.find_packages()
 
 
 setuptools.setup(
-    name=PACKAGE_NAME,
+    name=PROJECT_NAME,
     version=SEMVER_VERSION,
+    setup_requires=SETUP_REQUIREMENTS,
     install_requires=INSTALL_REQUIREMENTS,
     tests_require=TESTS_REQUIREMENTS,
-    test_suite=TEST_SUITE,
     packages=PACKAGES,
     include_package_data=True,
 )

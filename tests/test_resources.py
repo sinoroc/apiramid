@@ -22,7 +22,6 @@ DOCUMENT_PATH = os.path.join(
 )
 
 
-
 @pyramid.events.subscriber(pyramid.events.ApplicationCreated)
 def show_routes_app(event):
     """ Log created routes.

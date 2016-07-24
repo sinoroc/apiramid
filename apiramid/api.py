@@ -67,7 +67,8 @@ class Api(object):
         result = {}
         responses = resource.responses or []
         for response in responses:
-            if response.method == resource.method and response.code == http_status_code:
+            if (response.method == resource.method and
+                    response.code == http_status_code):
                 for body in response.body:
                     if body.media_type == media_type:
                         result = body.schema

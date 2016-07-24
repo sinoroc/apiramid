@@ -5,6 +5,7 @@
 *.pyc
 /*.egg/
 /*.egg-info/
+/.cache/
 /.eggs/
 /.venv/
 /build/

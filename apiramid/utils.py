@@ -21,12 +21,16 @@ def validate_uri_parameter(parameter, value):
     """
     if not value:
         if parameter.required:
-            message = _("Required URI parameter {} is missing.").format(parameter.name)
+            message = _("Required URI parameter {} is missing.").format(
+                parameter.name,
+            )
             raise pyramid.httpexceptions.HTTPBadRequest(message)
     else:
         param_type = getattr(parameter, 'type', 'string')
         if param_type == 'integer' and not value.isdigit():
-            message = _("URI parameter {} should be an integer.").format(parameter.name)
+            message = _("URI parameter {} should be an integer.").format(
+                parameter.name,
+            )
             raise pyramid.httpexceptions.HTTPBadRequest(message)
     return None
 

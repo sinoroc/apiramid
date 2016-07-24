@@ -21,7 +21,6 @@ DOCUMENT_PATH = os.path.join(
 )
 
 
-
 @apiramid.endpoint.EndpointDefaults(path='/capitalize', deserialize=True)
 class Capitalize(object):
 

@@ -8,6 +8,7 @@ python:
 
 # command to run tests
 script:
+    - "python setup.py pep8"
     - "python setup.py pytest"
 
 

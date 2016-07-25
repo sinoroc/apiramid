@@ -2,12 +2,15 @@
 """
 
 
+# pylint: disable=duplicate-code
+
+
 import json
 import os
+import unittest
 
 import apiramid
 import pyramid.testing
-import unittest
 import webtest
 import xmltodict
 
@@ -22,13 +25,18 @@ DOCUMENT_PATH = os.path.join(
 
 
 @apiramid.endpoint.EndpointDefaults(path='/capitalize', deserialize=True)
-class Capitalize(object):
+class Capitalize:
+    """ Capitalize endpoint
+    """
 
     def __init__(self, context, request):
+        dummy = context
         self.request = request
         return None
 
     def capitalize(self):
+        """ Capitalize the 'text' field of the request's JSON body.
+        """
         text = self.request.dict_body.get('text', '')
         result = {
             'text': text.capitalize(),
@@ -37,13 +45,17 @@ class Capitalize(object):
 
     @apiramid.endpoint.Endpoint(request_method='PUT')
     def put(self):
+        """ View callable for PUT method.
+        """
         result = self.capitalize()
         return pyramid.httpexceptions.HTTPOk(
             body=result,
         )
 
 
-class XmlRendererFactory:
+class XmlRendererFactory:  # pylint: disable=too-few-public-methods
+    """ Renderer factory for XML media type
+    """
 
     MEDIA_TYPE = 'application/xml'
 
@@ -58,7 +70,9 @@ class XmlRendererFactory:
         return result
 
 
-class XmlDeserializerFactory:
+class XmlDeserializerFactory:  # pylint: disable=too-few-public-methods
+    """ Deserializer factory for XML media type
+    """
 
     def __init__(self, info):
         pass
@@ -68,7 +82,9 @@ class XmlDeserializerFactory:
         return result
 
 
-class JsonDeserializerFactory:
+class JsonDeserializerFactory:  # pylint: disable=too-few-public-methods
+    """ Deserializer factory for JSON media type
+    """
 
     def __init__(self, info):
         pass
@@ -79,6 +95,8 @@ class JsonDeserializerFactory:
 
 
 class TestAccept(unittest.TestCase):
+    """ Test cases for content types in HTTP header 'Accept'
+    """
 
     def setUp(self):
         self.path = '/v0.0/capitalize'
@@ -110,46 +128,64 @@ class TestAccept(unittest.TestCase):
         return None
 
     def test_json_to_json(self):
+        """ Test case for JSON to JSON
+        """
         response = self.json_to_media_type('application/json')
         text = response.json['text']
         self.assertEqual(text, self.output_text)
         return None
 
     def test_json_to_text(self):
-        response = self.json_to_media_type('text/plain')
+        """ Test case for JSON to text
+        """
+        self.json_to_media_type('text/plain')
         return None
 
     def test_json_to_xml(self):
+        """ Test case for JSON to XML
+        """
         response = self.json_to_media_type('application/xml')
         text = xmltodict.parse(response.body)['text']
         self.assertEqual(text, self.output_text)
         return None
 
     def test_xml_to_json(self):
+        """ Test case for XML to JSON
+        """
         response = self.xml_to_media_type('application/json')
         text = response.json['text']
         self.assertEqual(text, self.output_text)
         return None
 
     def test_xml_to_text(self):
-        response = self.xml_to_media_type('text/plain')
+        """ Test case for XML to text
+        """
+        self.xml_to_media_type('text/plain')
         return None
 
     def test_xml_to_xml(self):
+        """ Test case for XML to XML
+        """
         response = self.xml_to_media_type('application/xml')
         text = xmltodict.parse(response.body)['text']
         self.assertEqual(text, self.output_text)
         return None
 
     def json_to_media_type(self, media_type):
+        """ Helper to test a request with JSON body
+        """
         body = json.dumps(self.input_dict)
         return self.request(body, 'application/json', media_type)
 
     def xml_to_media_type(self, media_type):
+        """ Helper to test a request with XML body
+        """
         body = xmltodict.unparse(self.input_dict)
         return self.request(body, 'application/xml', media_type)
 
     def request(self, body, content_type, accept):
+        """ Helper to test a request
+        """
         response = self.test_application.put(
             self.path,
             body,

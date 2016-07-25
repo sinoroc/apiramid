@@ -20,7 +20,7 @@ LOG = logging.getLogger(MODULE_NAME)
 _ = i18n._
 
 
-class EndpointDefaults(object):
+class EndpointDefaults:  # pylint: disable=too-few-public-methods
     """ Class decorator.
         Set defaults for methods decorated with ``Endpoint`` decorator.
     """
@@ -39,7 +39,7 @@ class EndpointDefaults(object):
         return result
 
 
-class Endpoint(object):
+class Endpoint:
     """ Decorator for function, method or class callable.
     """
 
@@ -77,9 +77,11 @@ class Endpoint(object):
     def callback(self, scanner, dummy_name, obj):
         """ Venusian callback.
         """
-        if self.venusian_info.scope == 'class':
+        scope = self.venusian_info.scope  # pylint: disable=no-member
+        if scope == 'class':
             self.decoratee_class = obj
-        config = scanner.config.with_package(self.venusian_info.module)
+        module = self.venusian_info.module  # pylint: disable=no-member
+        config = scanner.config.with_package(module)
         self.set_defaults(getattr(obj, EndpointDefaults.ATTRIBUTE_NAME, {}))
         self.check()
         self.api_util = config.registry.queryUtility(api.IApi)
@@ -196,6 +198,8 @@ class Endpoint(object):
         return result
 
     def deserialize(self, request):
+        """ Deserialize the body of the incoming request.
+        """
         if self.endpoint.get('deserialize', False):
             media_type = request.content_type
             deserializer = self.api_util.find_media_deserializer(media_type)
@@ -216,7 +220,7 @@ class Endpoint(object):
         """ Run the actual view callable decorated in the user application.
         """
         result = None
-        if self.venusian_info.scope == 'class':
+        if self.venusian_info.scope == 'class':  # pylint: disable=no-member
             # decoratee is a method
             view_callable = self.decoratee_class(*args, **kwargs)
             result = self.decoratee(view_callable)
@@ -231,7 +235,7 @@ class Endpoint(object):
             raise Exception(_("Could not identify view callable."))
         return result
 
-    def checkout(self, request):
+    def checkout(self, request):  # pylint: disable=no-self-use
         """ Validate response.
         """
         response = request.response

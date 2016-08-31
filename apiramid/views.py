@@ -3,8 +3,9 @@
 
 
 import logging
-import pyramid
 import traceback
+
+import pyramid
 
 from . import api
 
@@ -45,23 +46,25 @@ def exception_view(exception, request):
     """ Render the view in case of HTTP exception.
         Build an internal server and do not leak internal details.
     """
-    LOG.error("Exception {} '{}': {}".format(
+    LOG.error(
+        "Exception %s '%s': %s",
         exception.__class__.__name__,
         str(exception),
         traceback.format_exc(),
-    ))
+    )
     internal_exception = pyramid.httpexceptions.HTTPInternalServerError()
     return build_http_exception_dict(internal_exception, request)
 
 
 def http_exception_view(exception, request):
     """ Render the view in case of HTTP exception. """
-    LOG.error("HTTP exception {} '{}': {} -- {}".format(
+    LOG.error(
+        "HTTP exception %s '%s': %s -- %s",
         exception.code,
         exception.title,
         exception.detail,
         exception.comment,
-    ))
+    )
     return build_http_exception_dict(exception, request)
 
 

@@ -3,9 +3,10 @@
 
 
 import logging
+import urllib
+
 import pyramid
 import ramlfications
-import urllib
 import zope.interface
 
 
@@ -20,14 +21,14 @@ DEFAULT_MEDIA_RENDERERS = {
 }
 
 
-class IApi(zope.interface.Interface):
+class IApi(zope.interface.Interface):  # pylint: disable=inherit-non-class
     """ Interface for the API utility
     """
     pass
 
 
 @zope.interface.implementer(IApi)
-class Api(object):
+class Api:
     """ API utility
     """
 
@@ -58,7 +59,12 @@ class Api(object):
                 result.append(node.method.upper())
         return result
 
-    def find_schema(self, resource, http_status_code, media_type):
+    def find_schema(
+            self,
+            resource,
+            http_status_code,
+            media_type,
+    ):  # pylint: disable=no-self-use
         """ Find and return the corresponding schema in the document.
             resource - class ramlfications.raml.ResourceNode
             http_status_code - int
@@ -89,18 +95,26 @@ class Api(object):
         return result
 
     def add_deserializer(self, deserializer_handle, deserializer):
+        """ Add a deserializer.
+        """
         self.deserializers[deserializer_handle] = deserializer
         return None
 
     def set_media_deserializer(self, media_type, deserializer):
+        """ Set the deserializer for this media type.
+        """
         self.media_deserializers[media_type] = deserializer
         return None
 
     def find_media_deserializer(self, media_type):
+        """ Find a desrializer for this media type.
+        """
         result = self.media_deserializers.get(media_type, None)
         return result
 
     def deserialize(self, deserializer_name, value, request=None):
+        """ Deserialize a value.
+        """
         maybe_deserializer = self.deserializers[deserializer_name]
         resolver = pyramid.path.DottedNameResolver()
         deserializer = resolver.maybe_resolve(maybe_deserializer)
@@ -122,6 +136,8 @@ def set_media_renderer(config, media_type, renderer):
 
 
 def add_deserializer(config, deserializer_handle, deserializer):
+    """ Add a deserializer.
+    """
     api_util = config.registry.queryUtility(IApi)
     api_util.add_deserializer(deserializer_handle, deserializer)
     return None

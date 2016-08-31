@@ -2,12 +2,15 @@
 """
 
 
+# pylint: disable=duplicate-code
+
+
 import logging
 import os
+import unittest
 
 import apiramid
-import pyramid.testing
-import unittest
+import pyramid
 import webtest
 
 
@@ -22,35 +25,21 @@ DOCUMENT_PATH = os.path.join(
 )
 
 
-@pyramid.events.subscriber(pyramid.events.ApplicationCreated)
-def show_routes_app(event):
-    """ Log created routes.
-    """
-    introspector = event.app.registry.introspector
-    introspectables = introspector.get_category('routes', [])
-    routes = [route['introspectable']['pattern'] for route in introspectables]
-    LOG.info("routes {}".format(routes))
-    return None
-
-
-@pyramid.events.subscriber(pyramid.events.NewRequest)
-def log_request(event):
-    """ Log incoming request.
-    """
-    LOG.info("--- {} {}".format(event.request.method, event.request.path_qs))
-    return None
-
-
 @apiramid.endpoint.EndpointDefaults(path='/bar/{id}')
-class Bar(object):
+class Bar:
+    """ Endpoint 'bar'
+    """
 
     def __init__(self, context, request):
+        dummy = context
         self.request = request
         self.bar_id = int(request.matchdict['id'])
         return None
 
     @apiramid.endpoint.Endpoint(request_method='GET')
     def get(self):
+        """ Method 'GET'
+        """
         result = None
         body = {
             'name': 'bar',
@@ -62,29 +51,43 @@ class Bar(object):
         return result
 
     @apiramid.endpoint.Endpoint(request_method='POST')
-    def post(self):
+    def post(self):  # pylint: disable=no-self-use
+        """ Method 'POST'
+        """
         raise pyramid.httpexceptions.HTTPNotImplemented()
 
     @apiramid.endpoint.Endpoint(request_method='PUT')
-    def put(self):
+    def put(self):  # pylint: disable=no-self-use
+        """ Method 'PUT'
+        """
         raise pyramid.httpexceptions.HTTPNotImplemented()
 
 
 @apiramid.endpoint.Endpoint(path='/foo', request_method='GET')
 def foo_get(context, request):
+    """ Endpoint 'GET' 'foo'
+    """
+    dummy = (context, request)
     return pyramid.httpexceptions.HTTPOk()
 
 
 @apiramid.endpoint.Endpoint(path='/foo', request_method='POST')
 def foo_post(context, request):
+    """ Endpoint 'POST' 'foo'
+    """
+    dummy = (context, request)
     return pyramid.httpexceptions.HTTPCreated()
 
 
 @apiramid.endpoint.Endpoint(path='/item', request_method='GET')
-class Item(object):
+class Item:  # pylint: disable=too-few-public-methods
+    """ Endpoint 'item'
+    """
 
     def __init__(self, context, request):
+        dummy = context
         self.request = request
+        return None
 
     def __call__(self):
         body = {
@@ -98,6 +101,8 @@ class Item(object):
 
 
 class TestResources(unittest.TestCase):
+    """ Test cases for resources
+    """
 
     def setUp(self):
         settings = {
@@ -114,19 +119,27 @@ class TestResources(unittest.TestCase):
         return None
 
     def test_get_root(self):
-        response = self.test_application.get('/', status=404)
+        """ Test case for root endpoint
+        """
+        self.test_application.get('/', status=404)
         return None
 
     def test_get_foo(self):
-        response = self.test_application.get('/v0.0/foo', status=200)
+        """ Test case for endpoint 'foo'
+        """
+        self.test_application.get('/v0.0/foo', status=200)
         return None
 
     def test_get_item(self):
-        response = self.test_application.get('/v0.0/item', status=200)
+        """ Test case for endpoint 'item'
+        """
+        self.test_application.get('/v0.0/item', status=200)
         return None
 
     def test_get_bar(self):
-        response = self.test_application.get('/v0.0/bar/1', status=200)
+        """ Test case for endpoint 'bar'
+        """
+        self.test_application.get('/v0.0/bar/1', status=200)
         return None
 
 

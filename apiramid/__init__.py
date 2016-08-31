@@ -6,14 +6,10 @@ import pyramid
 
 from . import api
 from . import endpoint
+from . import views
 
 
 MODULE_NAME = __name__
-
-__all__ = [
-    'endpoint.EndpointDefaults',
-    'endpoint.Endpoint',
-]
 
 
 def includeme(config):
